@@ -2,19 +2,41 @@
 
 import { useState } from 'react';
 
+import * as Switch from '@radix-ui/react-switch';
+
 export default function Home() {
   const [locked, setLocked] = useState(true);
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <h1>Smart Lock</h1>
-      <button
-        onClick={() => setLocked(!locked)}
-        className="p-4 px-8 border-solid border-2 border-gray-700 rounded"
+      <h1 style={{ fontSize: '.5em' }}>Smart Lock</h1>
+
+      <div></div>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
       >
-        {(locked && 'Unlock') || 'Lock'}
-      </button>
-      Locked: {(locked && 'Yes') || 'No'}
+        <Switch.Root
+          className="SwitchRoot"
+          id="lock-status"
+          onClick={() => setLocked(!locked)}
+          checked={locked}
+        >
+          <Switch.Thumb className="SwitchThumb" />
+        </Switch.Root>
+        <label
+          className="Label"
+          htmlFor="lock-status"
+          style={{ display: 'block', cursor: 'pointer', userSelect: 'none' }}
+        >
+          {(locked && 'Locked') || 'Unlocked'}
+        </label>
+      </div>
+      <div></div>
+      <div></div>
     </main>
   );
 }
