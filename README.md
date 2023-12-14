@@ -4,16 +4,15 @@ Designing and Prototyping a Smart Lock System using MQTT.
 
 ## Getting Started
 
-### Prerequisites
-
 This project consists of 3 sub-projects:
 
-- Broker: An [Eclipse Mosquitto](https://mosquitto.org/) message broker that implements the MQTT
+- **Broker**: An [Eclipse Mosquitto](https://mosquitto.org/) message broker that implements the MQTT
   protocol.
-- Smart Lock: An MQTT-based IoT "device" client application.
-- Controller: An Android MQTT "controller" client application.
+- **Controller**: An Android MQTT "controller" client application.
+- **Smart Lock**: An MQTT-based IoT "device" client application.
 
-#### The Broker
+
+### Broker
 
 1.  First, Install [Docker](https://docs.docker.com/install/)
     and [Docker Compose](https://docs.docker.com/compose/install/)
@@ -23,7 +22,7 @@ This project consists of 3 sub-projects:
 
 It will be running at ws://localhost:1883.
 
-#### The Smart Lock
+### Smart Lock
 
 The smart lock application is a Node.js / React / Next.js MQTT client app. It simulates an IoT
 smart device that connects to the Mosquitto broker.
@@ -44,7 +43,7 @@ pnpm dev
 
 Go to http://localhost:3000 to see the Smart Lock UI in a web browser.
 
-#### The Controller
+### Controller
 
 The controller interface is an Android app. Follow the steps at https://developer.android.com/build
 to run it.
