@@ -20,7 +20,7 @@ This project consists of 3 sub-projects:
 
         $ docker-compose up --build -d
 
-It will be running at ws://localhost:1883.
+It will be running at [ws://localhost:1883](ws://localhost:1883) -- the development username and password are `cis427` and `GoBlue!`.
 
 ### Smart Lock
 
@@ -41,14 +41,14 @@ corepack enable
 pnpm dev
 ```
 
-Go to http://localhost:3000 to see the Smart Lock UI in a web browser.
+Go to [http://localhost:3000](http://localhost:3000) to see the Smart Lock UI in a web browser.
 
 ### Controller
 
-The controller interface is an Android app. Follow the steps at https://developer.android.com/build
+The controller interface is an Android app. Follow the [Android build steps](https://developer.android.com/build)
 to run it.
 
 If you need a controller for development or testing and do not want to run Android, you can
 download and run [MQTTX](https://mqttx.app/downloads). From the MQTTX interface, add a connection
-to host `mqtt://localhost`, then click "Connect". Now you can send and receive messages with the
+to host `ws://localhost:1883`, then click "Connect". Now you can send and receive messages with the
 broker.
