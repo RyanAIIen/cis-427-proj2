@@ -8,7 +8,8 @@ Designing and Prototyping a Smart Lock System using MQTT.
 
 This project consists of 3 sub-projects:
 
-- Broker: An [Eclipse Mosquitto](https://mosquitto.org/) message broker that implements the MQTT protocol.
+- Broker: An [Eclipse Mosquitto](https://mosquitto.org/) message broker that implements the MQTT
+  protocol.
 - Smart Lock: An MQTT-based IoT "device" client application.
 - Controller: An Android MQTT "controller" client application.
 
@@ -20,6 +21,35 @@ This project consists of 3 sub-projects:
 
         $ docker-compose up --build -d
 
-1.  You can make a test connection to the broker by downloading and running
-    [MQTTX](https://mqttx.app/downloads). Add a connection to host `mqtt://localhost`.
-    Click "Connect"; a connection log should show in `./broker/log/mosquitto.log`.
+It will be running at ws://localhost:1883.
+
+#### The Smart Lock
+
+The smart lock application is a Node.js / React / Next.js MQTT client app. It simulates an IoT
+smart device that connects to the Mosquitto broker.
+
+The easiest way to install Node.js is with [NVM](https://github.com/nvm-sh/nvm):
+
+- On Linux & macOS: https://github.com/nvm-sh/nvm#installing-and-updating
+- On Windows: https://github.com/coreybutler/nvm-windows#installation--upgrades
+  (_IMPORTANT:_ [run installer as Administrator](https://stackoverflow.com/questions/50563188/access-denied-issue-with-nvm-in-windows-10))
+
+Once you have installed NVM, open a terminal and run:
+
+```bash
+nvm install 20
+corepack enable
+pnpm dev
+```
+
+Go to http://localhost:3000 to see the Smart Lock UI in a web browser.
+
+#### The Controller
+
+The controller interface is an Android app. Follow the steps at https://developer.android.com/build
+to run it.
+
+If you need a controller for development or testing and do not want to run Android, you can
+download and run [MQTTX](https://mqttx.app/downloads). From the MQTTX interface, add a connection
+to host `mqtt://localhost`, then click "Connect". Now you can send and receive messages with the
+broker.
