@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 16, 16, 16;
+  --background-start-rgb: 196, 255, 196;
+  --background-end-rgb: 196, 196, 255;
+}
+
+body {
+  font-size: 48px;
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+}
