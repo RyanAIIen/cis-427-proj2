@@ -4,6 +4,8 @@ import { useState } from 'react';
 
 import * as Switch from '@radix-ui/react-switch';
 
+import { MQTTConnection } from '@/components/MQTTConnection';
+
 export default function Home() {
   const [locked, setLocked] = useState(true);
 
@@ -11,7 +13,8 @@ export default function Home() {
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <h1 style={{ fontSize: '.5em' }}>Smart Lock</h1>
 
-      <div></div>
+      <MQTTConnection />
+
       <div
         style={{
           display: 'flex',
