@@ -6,21 +6,21 @@ Designing and Prototyping a Smart Lock System using MQTT.
 
 This project consists of 3 sub-projects:
 
-- **Broker**: An [Eclipse Mosquitto](https://mosquitto.org/) message broker that implements the MQTT
-  protocol.
+- **Broker**: An [Eclipse Mosquitto](https://mosquitto.org/) message broker that implements the
+  MQTT protocol.
 - **Controller**: An Android MQTT "controller" client application.
 - **Smart Lock**: An MQTT-based IoT "device" client application.
 
-
 ### Broker
 
-1.  First, Install [Docker](https://docs.docker.com/install/)
-    and [Docker Compose](https://docs.docker.com/compose/install/)
+1.  First, Install [Docker](https://docs.docker.com/install/) and
+    [Docker Compose](https://docs.docker.com/compose/install/).
 1.  From a terminal, run the broker container:
 
         $ docker-compose up --build -d
 
-It will be running at [ws://localhost:1883](ws://localhost:1883) -- the development username and password are `cis427` and `GoBlue!`.
+It will be running at `ws://localhost:1883` -- the development username and password are `cis427`
+and `GoBlue!`.
 
 ### Smart Lock
 
@@ -38,10 +38,11 @@ Once you have installed NVM, open a terminal and run:
 ```bash
 nvm install 20
 corepack enable
+pnpm install
 pnpm dev
 ```
 
-Go to [http://localhost:3000](http://localhost:3000) to see the Smart Lock UI in a web browser.
+Go to http://localhost:3000 to see the Smart Lock UI in a web browser.
 
 ### Controller
 
