@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import mqtt, {
   IClientOptions,
   IClientPublishOptions,
@@ -6,18 +6,24 @@ import mqtt, {
   MqttClient,
 } from 'mqtt';
 
-const CONNECTION_HOST = 'ws://localhost';
-const CONNECTION_OPTIONS = {
-  port: 1883,
-  username: 'cis427',
-  password: 'GoBlue!',
+import { LockContext } from '@/components/LockContext';
+
+const CONNECTION_HOST = 'wss://broker.hivemq.com:8884/mqtt';
+const CONNECTION_OPTIONS = {};
+
+const TOPIC_PREFIX = '9qYTNkV39xctgVe46TMqtr9QC';
+const topics = {
+  status: `${TOPIC_PREFIX}/status`,
+  lockRequest: `${TOPIC_PREFIX}/lockRequest`,
+  unlockRequest: `${TOPIC_PREFIX}/unlockRequest`,
+  actTempPassRequest: `${TOPIC_PREFIX}/actTempPassRequest`,
 };
 
 export const MQTTConnection = () => {
   const [client, setClient] = useState<MqttClient | null>(null);
-  const [isSubscribed, setIsSubscribed] = useState(false);
-  const [payload, setPayload] = useState({});
   const [connectionStatus, setConnectionStatus] = useState('Disconnected');
+
+  const { isLocked, setIsLocked } = useContext(LockContext);
 
   // https://github.com/mqttjs/MQTT.js#mqttconnecturl-options
   const mqttConnect = (
@@ -30,10 +36,15 @@ export const MQTTConnection = () => {
 
   useEffect(() => {
     if (client) {
+      mqttPublish(topics.status, isLocked ? 'Locked' : 'Unlocked');
+
       // https://github.com/mqttjs/MQTT.js#event-connect
       client.on('connect', () => {
         setConnectionStatus('Connected');
         console.log('Connection successful');
+
+        mqttSubscribe(topics.unlockRequest);
+        mqttSubscribe(topics.lockRequest);
       });
 
       // https://github.com/mqttjs/MQTT.js#event-error
@@ -49,14 +60,16 @@ export const MQTTConnection = () => {
 
       // https://github.com/mqttjs/MQTT.js#event-message
       client.on('message', (topic, message) => {
-        const payload = { topic, message: message.toString() };
-        setPayload(payload);
-        console.log(`Received message '${message}' from topic: ${topic}`);
+        if (topic === topics.unlockRequest && message) {
+          setIsLocked(false);
+        } else if (topic === topics.lockRequest && message) {
+          setIsLocked(true);
+        }
       });
     } else {
       mqttConnect();
     }
-  }, [client]);
+  }, [client, isLocked]);
 
   // https://github.com/mqttjs/MQTT.js#mqttclientendforce-options-callback
   const mqttDisconnect = () => {
@@ -77,7 +90,7 @@ export const MQTTConnection = () => {
   const mqttPublish = (
     topic: string,
     message: string,
-    options: IClientPublishOptions
+    options?: IClientPublishOptions
   ) => {
     if (client) {
       client.publish(topic, message, options, (error) => {
@@ -89,7 +102,7 @@ export const MQTTConnection = () => {
   };
 
   // https://github.com/mqttjs/MQTT.js#mqttclientsubscribetopictopic-arraytopic-object-options-callback
-  const mqttSubscribe = (topic: string, options: IClientSubscribeOptions) => {
+  const mqttSubscribe = (topic: string, options?: IClientSubscribeOptions) => {
     if (client) {
       client.subscribe(topic, options, (error) => {
         if (error) {
@@ -97,13 +110,17 @@ export const MQTTConnection = () => {
           return;
         }
         console.log(`Subscribe to topics: ${topic}`);
-        setIsSubscribed(true);
       });
+    } else {
+      console.log('Client not connected');
     }
   };
 
   // https://github.com/mqttjs/MQTT.js#mqttclientunsubscribetopictopic-array-options-callback
-  const mqttUnsubscribe = (topic: string, options: IClientSubscribeOptions) => {
+  const mqttUnsubscribe = (
+    topic: string,
+    options?: IClientSubscribeOptions
+  ) => {
     if (client) {
       client.unsubscribe(topic, options, (error) => {
         if (error) {
@@ -111,12 +128,15 @@ export const MQTTConnection = () => {
           return;
         }
         console.log(`unsubscribed topic: ${topic}`);
-        setIsSubscribed(false);
       });
     }
   };
 
   const isConnected = client && client.connected;
+
+  const btnClass = `p-1 px-2 bg-gray-200 border border-solid border-gray-400 rounded text-xs ${
+    !client && 'invisible'
+  }`;
 
   return (
     <div className="text-base text-center">
@@ -129,10 +149,8 @@ export const MQTTConnection = () => {
         {connectionStatus}
       </p>
 
-      <button
-        className={`p-1 px-2 bg-gray-200 border border-solid border-gray-400 rounded text-xs ${
-          !client && 'invisible'
-        }`}
+      {/* <button
+        className={btnClass}
         onClick={() => {
           if (isConnected) {
             mqttDisconnect();
@@ -142,7 +160,16 @@ export const MQTTConnection = () => {
         }}
       >
         {isConnected ? 'Disconnect' : 'Connect'}
-      </button>
+      </button> */}
+
+      {/* <input onChange={(event) => setStatus(event.target.value)} />
+      <div>{status}</div>
+      <button
+        className={btnClass}
+        onClick={() => mqttPublish(`${TOPIC_PREFIX}/status`, status)}
+      >
+        Publish
+      </button> */}
     </div>
   );
 };
