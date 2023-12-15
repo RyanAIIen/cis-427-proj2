@@ -15,7 +15,7 @@ This project consists of 3 sub-projects:
 
 1.  First, Install [Docker](https://docs.docker.com/install/) and
     [Docker Compose](https://docs.docker.com/compose/install/).
-2.  From a terminal, run the broker container:
+1.  From a terminal, run the broker container:
 
         $ docker-compose up --build -d
 
@@ -38,10 +38,11 @@ Once you have installed NVM, open a terminal and run:
 ```bash
 nvm install 20
 corepack enable
+pnpm install
 pnpm dev
 ```
 
-Go to [http://localhost:3000](http://localhost:3000) to see the Smart Lock UI in a web browser.
+Go to http://localhost:3000 to see the Smart Lock UI in a web browser.
 
 ### Controller
 
