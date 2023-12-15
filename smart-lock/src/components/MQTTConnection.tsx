@@ -6,14 +6,24 @@ import mqtt, {
   MqttClient,
 } from 'mqtt';
 
+const CONNECTION_HOST = 'ws://localhost';
+const CONNECTION_OPTIONS = {
+  port: 1883,
+  username: 'cis427',
+  password: 'GoBlue!',
+};
+
 export const MQTTConnection = () => {
   const [client, setClient] = useState<MqttClient | null>(null);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [payload, setPayload] = useState({});
-  const [connectionStatus, setConnectionStatus] = useState('');
+  const [connectionStatus, setConnectionStatus] = useState('Disconnected');
 
   // https://github.com/mqttjs/MQTT.js#mqttconnecturl-options
-  const mqttConnect = (host: string, options: IClientOptions) => {
+  const mqttConnect = (
+    host = CONNECTION_HOST,
+    options = CONNECTION_OPTIONS
+  ) => {
     setConnectionStatus('Connecting...');
     setClient(mqtt.connect(host, options));
   };
@@ -43,6 +53,8 @@ export const MQTTConnection = () => {
         setPayload(payload);
         console.log(`Received message '${message}' from topic: ${topic}`);
       });
+    } else {
+      mqttConnect();
     }
   }, [client]);
 
@@ -53,6 +65,7 @@ export const MQTTConnection = () => {
         client.end(false, () => {
           setConnectionStatus('Disconnecting...');
           console.log('Disconnection successful');
+          setConnectionStatus('Disconnected');
         });
       } catch (error) {
         console.log('Disconnect error:', error);
@@ -107,18 +120,24 @@ export const MQTTConnection = () => {
 
   return (
     <div className="text-base text-center">
-      <p className="mb-2 text-xs">{connectionStatus}</p>
+      <p className="mb-2">
+        <span
+          className={`mr-1 ${isConnected ? 'text-green-600' : 'text-red-600'}`}
+        >
+          &#9679;
+        </span>
+        {connectionStatus}
+      </p>
+
       <button
-        className="p-1 px-2 bg-gray-200 border border-solid border-gray-400 rounded"
+        className={`p-1 px-2 bg-gray-200 border border-solid border-gray-400 rounded text-xs ${
+          !client && 'invisible'
+        }`}
         onClick={() => {
           if (isConnected) {
             mqttDisconnect();
           } else {
-            mqttConnect('ws://localhost', {
-              port: 1883,
-              username: 'cis427',
-              password: 'GoBlue!',
-            });
+            mqttConnect();
           }
         }}
       >
