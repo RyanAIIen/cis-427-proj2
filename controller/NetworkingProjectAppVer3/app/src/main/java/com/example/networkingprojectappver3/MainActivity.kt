@@ -13,7 +13,9 @@ import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient.Mqtt3SubscribeAndCallbackBu
 import com.hivemq.client.mqtt.mqtt3.message.Mqtt3Message
 import com.hivemq.client.mqtt.mqtt3.message.connect.connack.Mqtt3ConnAck
 import com.hivemq.client.mqtt.mqtt3.message.publish.Mqtt3Publish
+import com.hivemq.client.mqtt.mqtt3.message.subscribe.Mqtt3Subscribe
 import com.hivemq.client.mqtt.mqtt3.message.subscribe.suback.Mqtt3SubAck
+import java.net.SocketAddress
 import java.util.UUID
 import java.util.concurrent.CompletableFuture
 import java.util.function.Consumer
@@ -21,20 +23,11 @@ import java.util.function.Consumer
 class MainActivity : AppCompatActivity() {
 
     lateinit var statusApp: TextView
-    lateinit var clientIdApp: EditText
     lateinit var passwordApp: EditText
-    lateinit var clientIdForTempPasswordApp: EditText
     lateinit var permPasswordApp: EditText
-    lateinit var status: String
     lateinit var clientId: String
     lateinit var password: String
-    lateinit var clientIdForTempPassword: String
-    lateinit var permPassword: String
-    lateinit var subscribeClient: Mqtt3AsyncClient
-    lateinit var publishClient: Mqtt3AsyncClient
-    lateinit var connAckFuturePub: CompletableFuture<Mqtt3ConnAck>
-    lateinit var connAckFutureSub: CompletableFuture<Mqtt3ConnAck>
-    lateinit var message: Consumer<Mqtt3Publish>
+    lateinit var client: Mqtt3AsyncClient
 
     //https://hivemq.github.io/hivemq-mqtt-client/docs/quick-start/
     //https://hivemq.github.io/hivemq-mqtt-client/docs/installation/android/
@@ -53,76 +46,71 @@ class MainActivity : AppCompatActivity() {
         statusApp  = findViewById(R.id.Status)
         statusApp.text = "No Connection"
 
-
-
-        subscribeClient  = MqttClient.builder()
+        // how to build and connect to broker
+        client  = MqttClient.builder()
             .useMqttVersion3()
             .identifier(UUID.randomUUID().toString())
-            .serverHost("mqtt-dashboard.com")
+            .serverHost("broker.hivemq.com")
+            .serverPort(1883)
             .buildAsync();
-        subscribeClient.connectWith()
+        client.connectWith()
             .simpleAuth()
-            .username("test")
-            .password("test".encodeToByteArray())
+                .username("test")
+                .password("test".encodeToByteArray())
             .applySimpleAuth()
             .send()
-        subscribeClient.subscribeWith()
-            .topicFilter("testtopic/1")
-            .callback {
-                    statusApp.text = it.payload.get().asCharBuffer()
-                }
-            .send()
 
-
-        publishClient  = MqttClient.builder()
-            .useMqttVersion3()
-            .identifier(UUID.randomUUID().toString())
-            .serverHost("mqtt-dashboard.com")
-            .buildAsync();
-        connAckFuturePub = publishClient.connectWith()
-            .simpleAuth()
-            .username("test")
-            .password("test".encodeToByteArray())
-            .applySimpleAuth()
-            .send()
-        publishClient.publishWith()
-            .topic("testtopic/1")
+        // how to subscribe
+        client.subscribeWith()
+            .topicFilter("9qYTNkV39xctgVe46TMqtr9QC/status")
             .qos(MqttQos.EXACTLY_ONCE)
-            .payload("placeholder".encodeToByteArray())
+            .callback {
+                statusApp.text = it.payloadAsBytes.decodeToString()
+            }
             .send()
 
-        //statusApp.text = pubMessage.toString()
-        //statusApp.text = connAckFuturePub.get().returnCode.toString()
-    }
 
 
-    fun updateStatus(view: View) {
-        statusApp.text = " "
+        // test if connection to broker
+        // statusApp.text = connAckFuture.get().returnCode.toString()
     }
 
     fun unlock(view: View) {
-        clientIdApp = findViewById(R.id.clientId)
-        clientId = clientIdApp.text.toString()
+
         passwordApp = findViewById(R.id.password)
         password = passwordApp.text.toString()
         // to do
 
+        // how to publish to a topic
+        client.publishWith()
+            .topic("9qYTNkV39xctgVe46TMqtr9QC/unlockRequest")
+            .qos(MqttQos.EXACTLY_ONCE)
+            .payload(( /* clientId+"?"+ */ password).encodeToByteArray())
+            .send()
     }
     fun lock(view: View) {
-        clientIdApp = findViewById(R.id.clientId)
-        clientId = clientIdApp.text.toString()
+
         passwordApp = findViewById(R.id.password)
         password = passwordApp.text.toString()
         // to do
+        client.publishWith()
+            .topic("9qYTNkV39xctgVe46TMqtr9QC/lockRequest")
+            .qos(MqttQos.EXACTLY_ONCE)
+            .payload(( /* clientId+"?"+ */ password).encodeToByteArray())
+            .send()
+
     }
     fun actTempPass(view: View) {
-        clientIdForTempPasswordApp = findViewById(R.id.clientIdForTemp)
-        clientIdForTempPassword = clientIdForTempPasswordApp.text.toString()
+
         permPasswordApp = findViewById(R.id.permPassword)
         password = permPasswordApp.text.toString()
         // to do
+        client.publishWith()
+            .topic("9qYTNkV39xctgVe46TMqtr9QC/actTempPassRequest")
+            .qos(MqttQos.EXACTLY_ONCE)
+            .payload(( /* clientId+"?"+ */ password).encodeToByteArray())
+            .send()
     }
-
 }
 
 /*
