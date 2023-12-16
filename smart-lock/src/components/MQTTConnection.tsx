@@ -40,54 +40,6 @@ export const MQTTConnection = () => {
     setClient(mqtt.connect(host, options));
   };
 
-  const checkPwOrTempPw = (pw: string) => {
-    if (pw === password) {
-      console.log('used permanent pw');
-      return true;
-    }
-    if (tempPasswordEnabled) {
-      if (pw === tempPassword) {
-        console.log('used temp pw');
-        return true;
-      } else {
-        console.log('wrong temp pw');
-      }
-    } else {
-      console.log('temp pw not enabled');
-    }
-    console.log('bad pw:', pw);
-    return false;
-  };
-
-  const attemptUnlock = (msg: string) => {
-    console.log('attempt unlock');
-    if (checkPwOrTempPw(msg)) {
-      setIsLocked(false);
-      setTempPasswordEnabled(false);
-    } else {
-      console.log(`Unlock request with invalid password: ${msg}`);
-    }
-  };
-
-  const attemptLock = (msg: string) => {
-    console.log('attempt lock');
-    if (checkPwOrTempPw(msg)) {
-      setIsLocked(true);
-      setTempPasswordEnabled(false);
-    } else {
-      console.log(`Lock request with invalid password: ${msg}`);
-    }
-  };
-
-  const attemptActTempPassword = (msg: string) => {
-    console.log('attempt activate temp password');
-    if (msg === password) {
-      setTempPasswordEnabled(true);
-    } else {
-      console.log(`Temp pass request with invalid password: ${msg}`);
-    }
-  };
-
   useEffect(() => {
     if (client) {
       mqttPublish(topics.status, isLocked ? 'Locked' : 'Unlocked');
@@ -129,6 +81,40 @@ export const MQTTConnection = () => {
       mqttConnect();
     }
   }, [client, isLocked, tempPasswordEnabled]);
+
+  const checkPwOrTempPw = (pw: string) =>
+    Boolean(console.log(pw)) ||
+    pw === password ||
+    (tempPasswordEnabled && pw === tempPassword);
+
+  const attemptUnlock = (msg: string) => {
+    console.log('attempt unlock');
+    if (checkPwOrTempPw(msg)) {
+      setIsLocked(false);
+      setTempPasswordEnabled(false);
+    } else {
+      console.log(`Unlock request with invalid password: ${msg}`);
+    }
+  };
+
+  const attemptLock = (msg: string) => {
+    console.log('attempt lock');
+    if (checkPwOrTempPw(msg)) {
+      setIsLocked(true);
+      setTempPasswordEnabled(false);
+    } else {
+      console.log(`Lock request with invalid password: ${msg}`);
+    }
+  };
+
+  const attemptActTempPassword = (msg: string) => {
+    console.log('attempt activate temp password');
+    if (msg === password) {
+      setTempPasswordEnabled(true);
+    } else {
+      console.log(`Temp pass request with invalid password: ${msg}`);
+    }
+  };
 
   // https://github.com/mqttjs/MQTT.js#mqttclientendforce-options-callback
   const mqttDisconnect = () => {

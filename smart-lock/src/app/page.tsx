@@ -32,9 +32,6 @@ export default function Home() {
         <MQTTConnection />
         <h1 className="text-2xl mb-20">Smart Lock</h1>
 
-        <div className="text-center">
-          <span>{isLocked ? <LockedIcon /> : <UnlockedIcon />}</span>
-        </div>
         <Switch.Root
           className="SwitchRoot"
           id="lock-status"
