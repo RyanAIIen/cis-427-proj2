@@ -2,6 +2,9 @@
 
 Designing and Prototyping a Smart Lock System using MQTT.
 
+The Primary Password for the Lock is `YouShallNotPass`.
+The default Temp Password is `temp1234`.
+
 ## Getting Started
 
 This project consists of 3 sub-projects:
