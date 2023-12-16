@@ -11,6 +11,3 @@ services:
       - './broker/config:/mosquitto/config'
       - './broker/data:/mosquitto/data/'
       - './broker/log:/mosquitto/log'
-
-volumes:
-  mosquitto_data:
