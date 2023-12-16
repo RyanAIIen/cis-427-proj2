@@ -1,6 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
 import mqtt, {
-  IClientOptions,
   IClientPublishOptions,
   IClientSubscribeOptions,
   MqttClient,
@@ -23,7 +22,14 @@ export const MQTTConnection = () => {
   const [client, setClient] = useState<MqttClient | null>(null);
   const [connectionStatus, setConnectionStatus] = useState('Disconnected');
 
-  const { isLocked, setIsLocked } = useContext(LockContext);
+  const {
+    password,
+    tempPassword,
+    tempPasswordEnabled,
+    setTempPasswordEnabled,
+    isLocked,
+    setIsLocked,
+  } = useContext(LockContext);
 
   // https://github.com/mqttjs/MQTT.js#mqttconnecturl-options
   const mqttConnect = (
@@ -32,6 +38,54 @@ export const MQTTConnection = () => {
   ) => {
     setConnectionStatus('Connecting...');
     setClient(mqtt.connect(host, options));
+  };
+
+  const checkPwOrTempPw = (pw: string) => {
+    if (pw === password) {
+      console.log('used permanent pw');
+      return true;
+    }
+    if (tempPasswordEnabled) {
+      if (pw === tempPassword) {
+        console.log('used temp pw');
+        return true;
+      } else {
+        console.log('wrong temp pw');
+      }
+    } else {
+      console.log('temp pw not enabled');
+    }
+    console.log('bad pw:', pw);
+    return false;
+  };
+
+  const attemptUnlock = (msg: string) => {
+    console.log('attempt unlock');
+    if (checkPwOrTempPw(msg)) {
+      setIsLocked(false);
+      setTempPasswordEnabled(false);
+    } else {
+      console.log(`Unlock request with invalid password: ${msg}`);
+    }
+  };
+
+  const attemptLock = (msg: string) => {
+    console.log('attempt lock');
+    if (checkPwOrTempPw(msg)) {
+      setIsLocked(true);
+      setTempPasswordEnabled(false);
+    } else {
+      console.log(`Lock request with invalid password: ${msg}`);
+    }
+  };
+
+  const attemptActTempPassword = (msg: string) => {
+    console.log('attempt activate temp password');
+    if (msg === password) {
+      setTempPasswordEnabled(true);
+    } else {
+      console.log(`Temp pass request with invalid password: ${msg}`);
+    }
   };
 
   useEffect(() => {
@@ -45,6 +99,7 @@ export const MQTTConnection = () => {
 
         mqttSubscribe(topics.unlockRequest);
         mqttSubscribe(topics.lockRequest);
+        mqttSubscribe(topics.actTempPassRequest);
       });
 
       // https://github.com/mqttjs/MQTT.js#event-error
@@ -60,16 +115,20 @@ export const MQTTConnection = () => {
 
       // https://github.com/mqttjs/MQTT.js#event-message
       client.on('message', (topic, message) => {
-        if (topic === topics.unlockRequest && message) {
-          setIsLocked(false);
-        } else if (topic === topics.lockRequest && message) {
-          setIsLocked(true);
+        const msg = message.toString();
+
+        if (topic === topics.unlockRequest) {
+          attemptUnlock(msg);
+        } else if (topic === topics.lockRequest) {
+          attemptLock(msg);
+        } else if (topic === topics.actTempPassRequest) {
+          attemptActTempPassword(msg);
         }
       });
     } else {
       mqttConnect();
     }
-  }, [client, isLocked]);
+  }, [client, isLocked, tempPasswordEnabled]);
 
   // https://github.com/mqttjs/MQTT.js#mqttclientendforce-options-callback
   const mqttDisconnect = () => {
@@ -109,7 +168,7 @@ export const MQTTConnection = () => {
           console.log('Subscribe error:', error);
           return;
         }
-        console.log(`Subscribe to topics: ${topic}`);
+        console.log(`Subscribed to topic: ${topic}`);
       });
     } else {
       console.log('Client not connected');
@@ -134,13 +193,9 @@ export const MQTTConnection = () => {
 
   const isConnected = client && client.connected;
 
-  const btnClass = `p-1 px-2 bg-gray-200 border border-solid border-gray-400 rounded text-xs ${
-    !client && 'invisible'
-  }`;
-
   return (
-    <div className="text-base text-center">
-      <p className="mb-2">
+    <div className="text-sm text-center">
+      <p className="mb-1">
         <span
           className={`mr-1 ${isConnected ? 'text-green-600' : 'text-red-600'}`}
         >
@@ -148,28 +203,6 @@ export const MQTTConnection = () => {
         </span>
         {connectionStatus}
       </p>
-
-      {/* <button
-        className={btnClass}
-        onClick={() => {
-          if (isConnected) {
-            mqttDisconnect();
-          } else {
-            mqttConnect();
-          }
-        }}
-      >
-        {isConnected ? 'Disconnect' : 'Connect'}
-      </button> */}
-
-      {/* <input onChange={(event) => setStatus(event.target.value)} />
-      <div>{status}</div>
-      <button
-        className={btnClass}
-        onClick={() => mqttPublish(`${TOPIC_PREFIX}/status`, status)}
-      >
-        Publish
-      </button> */}
     </div>
   );
 };
